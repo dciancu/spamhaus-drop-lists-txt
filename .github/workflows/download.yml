@@ -12,6 +12,7 @@ jobs:
           git config user.email 'dciancu@users.noreply.github.com'
           git branch download
           git checkout download
+          rm lists/.gitignore
           bash download.sh
           git commit -m 'update lists'
           git push --force -u origin download
