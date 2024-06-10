@@ -14,5 +14,6 @@ jobs:
           git checkout download
           rm lists/.gitignore
           bash download.sh
+          git add -A
           git commit -m 'update lists'
           git push --force -u origin download
