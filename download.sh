@@ -42,13 +42,14 @@ echo "# $(jq -r '.copyright | select(. != null)' list.json)" >> "$filename"
 jq -r '.asn | select(. != null)' list.json | while read -r asn; do
     echo "Processing AS${asn}"
 
-    tries=5
+    tries=10
     while [ "$tries" -gt 0 ]; do
         set +e
         whois="$(whois -h whois.radb.net -- "-i origin AS${asn}")"
         exit_code="$?"
         set -e
         if [ "$exit_code" -ne 0 ]; then
+            echo 'ERROR processing whois, retrying ...'
             (( tries-- ))
             sleep 1
             continue;
