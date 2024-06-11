@@ -51,17 +51,18 @@ jq -r '.asn | select(. != null)' list.json | while read -r asn; do
         if [ "$exit_code" -ne 0 ]; then
             echo 'ERROR processing whois, retrying ...'
             (( tries-- ))
+            if [ "$tries" -eq 0 ]; then
+                echo "ERROR processing whois for AS${asn}"
+                exit 1
+            fi
             sleep 1
-            continue;
+            continue
         fi
 
+        tries=0
         echo "# AS${asn}" >> "$filename"
         awk '/^route6?:/ {print $2;}' <<< "$whois" | sort | uniq >> "$filename"
     done
-    if [ "$tries" -eq 0 ]; then
-        echo "ERROR processing whois for AS${asn}"
-        exit 1
-    fi
 done
 
 rm list.json
