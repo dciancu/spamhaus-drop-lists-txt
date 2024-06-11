@@ -13,6 +13,7 @@ jobs:
           git branch download
           git checkout download
           rm lists/.gitignore
+          apt-get install whois
           bash download.sh
           git add -A
           git commit -m 'update lists'
