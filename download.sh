@@ -55,6 +55,7 @@ jq -r '.asn | select(. != null)' list.json | while read -r asn; do
                 echo "ERROR processing whois for AS${asn}"
                 exit 1
             fi
+            echo 'Sleeping 30 seconds ...'
             sleep 30
             continue
         fi
