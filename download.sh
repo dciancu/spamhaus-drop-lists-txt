@@ -38,10 +38,29 @@ filename="${SCRIPT_DIR}/lists/asn.txt"
 wget -q -O list.json "$ASN_DROP"
 echo "# timestamp $(jq -r '.timestamp | select(. != null)' list.json)" > "$filename"
 echo "# $(jq -r '.copyright | select(. != null)' list.json)" >> "$filename"
+
 jq -r '.asn | select(. != null)' list.json | while read -r asn; do
     echo "Processing AS${asn}"
-    echo "# AS${asn}" >> "$filename"
-    whois -h whois.radb.net -- "-i origin AS${asn}" | awk '/^route6?:/ {print $2;}' | sort | uniq >> "$filename"
+
+    tries=5
+    while [ "$tries" -gt 0 ]; do
+        set +e
+        whois="$(whois -h whois.radb.net -- "-i origin AS${asn}")"
+        exit_code="$?"
+        set -e
+        if [ "$exit_code" -ne 0 ]; then
+            (( tries-- ))
+            sleep 1
+            continue;
+        fi
+
+        echo "# AS${asn}" >> "$filename"
+        awk '/^route6?:/ {print $2;}' <<< "$whois" | sort | uniq >> "$filename"
+    done
+    if [ "$tries" -eq 0 ]; then
+        echo "ERROR processing whois for AS${asn}"
+        exit 1
+    fi
 done
 
 rm list.json
