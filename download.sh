@@ -22,6 +22,9 @@ filename="${SCRIPT_DIR}/lists/asn.txt"
 wget -q -O list.json "$ASN_DROP"
 echo "# timestamp $(jq -r '.timestamp | select(. != null)' list.json)" > "$filename"
 echo "# $(jq -r '.copyright | select(. != null)' list.json)" >> "$filename"
-jq -r '.domain | select( . != null)' list.json >> "$filename"
+jq -r '.asn | select(. != null)' list.json | while read -r asn; do
+    echo "# AS${asn}" >> "$filename"
+    whois -h whois.radb.net -- "-i origin AS${asn}" | awk '/^route6?:/ {print $2;}' | sort | uniq >> "$filename"
+done
 
 rm list.json
